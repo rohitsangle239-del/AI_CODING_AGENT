@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Coding Agent Pro</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🤖 AI Coding Agent</h1>
+
+<div class="top-controls">
+
+<select id="provider">
+
+<option value="openrouter" selected>🌐 OpenRouter</option>
+<option value="gemini">✨ Gemini</option>
+<option value="groq">⚡ Groq</option>
+
+</select>
+
+<select id="model">
+
+<option value="deepseek/deepseek-chat">DeepSeek Chat</option>
+<option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
+<option value="qwen/qwen3-coder">Qwen Coder</option>
+<option value="mistralai/mistral-small">Mistral Small</option>
+
+</select>
+
+<select id="language">
+
+<option value="auto">Auto Detect</option>
+
+<option>HTML</option>
+<option>CSS</option>
+<option>JavaScript</option>
+<option>TypeScript</option>
+<option>Python</option>
+<option>Java</option>
+<option>C</option>
+<option>C++</option>
+<option>C#</option>
+<option>PHP</option>
+<option>SQL</option>
+<option>Go</option>
+<option>Rust</option>
+<option>Kotlin</option>
+<option>Swift</option>
+<option>Dart</option>
+<option>Flutter</option>
+<option>React</option>
+<option>Node.js</option>
+
+</select>
+
+</div>
+
+<textarea
+id="code"
+placeholder="Ask anything...
+
+Examples:
+
+• Create Portfolio Website
+
+• Generate Python Calculator
+
+• Explain JavaScript Code
+
+• Fix HTML
+
+• Build Login Page
+
+• Create Android App
+
+"></textarea>
+
+<div class="buttons">
+
+<button id="generateBtn">🌐 Generate Website</button>
+
+<button id="codeBtn">💻 Generate Code</button>
+
+<button id="analyzeBtn">🔍 Analyze Code</button>
+
+<button id="fixBtn">🛠 Fix Code</button>
+
+<button id="explainBtn">📖 Explain Code</button>
+
+<button id="previewBtn">👁 Live Preview</button>
+
+<button id="copyBtn">📋 Copy</button>
+
+<button id="downloadBtn">📥 Download</button>
+
+<button id="speakBtn">🔊 Speak</button>
+
+<button id="clearBtn">🗑 Clear</button>
+
+</div>
+
+
+<!-- ===============================
+AI Chat Area
+=============================== -->
+
+<div id="chatContainer">
+
+    <div id="result" class="chat-box"></div>
+
+</div>
+
+<iframe
+id="preview"
+sandbox="allow-scripts"
+title="Live Preview">
+</iframe>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
