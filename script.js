@@ -24,6 +24,9 @@ const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const speakBtn = document.getElementById("speakBtn");
 const clearBtn = document.getElementById("clearBtn");
+const askBtn = document.getElementById("askBtn");
+const micBtn = document.getElementById("micBtn");
+
 // ===============================
 // APP STATE
 // ===============================
@@ -33,6 +36,8 @@ const App = {
     isLoading: false,
 
     lastResponse: "",
+
+    conversation: [],
 
     currentProvider: () => provider.value,
 
@@ -164,6 +169,8 @@ function setButtons(disabled){
     downloadBtn.disabled = disabled;
     speakBtn.disabled = disabled;
     clearBtn.disabled = disabled;
+    askBtn.disabled = disabled;
+    micBtn.disabled = disabled;
 
 }
 // ===============================
@@ -203,10 +210,6 @@ function getProviderConfig() {
     return null;
 
 }
-
-// ===============================
-// Gemini API Function
-// ===============================
 
 // ===============================
 // AI Request
@@ -307,7 +310,24 @@ async function runPrompt(prompt){
 
         const answer = await askAI(prompt);
 
-        result.textContent = answer;
+        if(!answer){
+            setButtons(false);
+            return;
+        }
+
+        await typeWriter(answer);
+        App.lastResponse = answer;
+
+        if(
+            answer.includes("<html") ||
+            answer.includes("<!DOCTYPE html") ||
+            answer.includes("<body") ||
+            answer.includes("<div")
+        ){
+
+            preview.srcdoc = answer;
+
+        }
 
     }
 
@@ -592,6 +612,7 @@ clearBtn.onclick = () => {
     speechSynthesis.cancel();
 
     App.lastResponse = "";
+    App.conversation = [];
 
 };
 
@@ -614,55 +635,148 @@ previewBtn.onclick = () => {
 };
 
 // ===============================
-// Auto Preview
+// Append Chat Message
 // ===============================
 
-const originalRunPrompt = runPrompt;
+function appendMessage(role, text){
 
-runPrompt = async function(prompt){
+    const div = document.createElement("div");
 
-    try{
+    div.className = role === "user" ? "user-message" : "ai-message";
 
-        setButtons(true);
+    div.textContent = text;
 
-        const answer = await askAI(prompt);
+    result.appendChild(div);
 
-        if(!answer){
+    result.scrollTop = result.scrollHeight;
 
-            setButtons(false);
+    return div;
+
+}
+
+// ===============================
+// Chat Ask
+// ===============================
+
+async function askChat(){
+
+    const input = code.value.trim();
+
+    if(input === ""){
+        showError("Please type a message.");
+        return;
+    }
+
+    if(App.isLoading) return;
+
+    appendMessage("user", input);
+    code.value = "";
+
+    App.conversation.push({ role: "user", content: input });
+
+    App.isLoading = true;
+    setButtons(true);
+
+    const thinkingBubble = appendMessage("ai", "AI is thinking...");
+
+    try {
+
+        const config = getProviderConfig();
+
+        if(!config){
+            thinkingBubble.textContent = "Provider not supported.";
             return;
-
         }
 
-        await typeWriter(answer);
-       App.lastResponse = answer;
-       
-        if(
-            answer.includes("<html") ||
-            answer.includes("<!DOCTYPE html") ||
-            answer.includes("<body") ||
-            answer.includes("<div")
-        ){
+        const response = await fetch("/api/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: App.conversation,
+                provider: config.type,
+                model: App.currentModel()
+            })
+        });
 
-            preview.srcdoc = answer;
+        const data = await response.json();
 
+        if(!response.ok){
+            throw new Error(data.error?.message || data.error || "API Error");
         }
 
-    }
+        let answer;
 
-    catch(error){
+        if(config.type === "gemini"){
+            answer = data.candidates[0].content.parts[0].text;
+        } else {
+            answer = data.choices[0].message.content;
+        }
 
-        showError(error.message);
+        thinkingBubble.textContent = answer;
 
-    }
+        App.conversation.push({ role: "assistant", content: answer });
 
-    finally{
+        speak(answer);
 
+    } catch(error){
+
+        thinkingBubble.textContent = "❌ " + error.message;
+
+    } finally {
+
+        App.isLoading = false;
         setButtons(false);
 
     }
 
-};
+}
+
+askBtn.addEventListener("click", askChat);
+
+// ===============================
+// Voice Input (Speech to Text)
+// ===============================
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let recognition = null;
+
+if (SpeechRecognition) {
+
+    recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        micBtn.textContent = "🎙 Listening...";
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        code.value = transcript;
+        askChat();
+    };
+
+    recognition.onerror = () => {
+        showError("Could not hear you. Try again.");
+    };
+
+    recognition.onend = () => {
+        micBtn.textContent = "🎤 Speak to Ask";
+    };
+
+    micBtn.addEventListener("click", () => {
+        recognition.start();
+    });
+
+} else {
+
+    micBtn.addEventListener("click", () => {
+        showError("Voice input is not supported on this browser.");
+    });
+
+}
 
 // ===============================
 // Enter Key Support
