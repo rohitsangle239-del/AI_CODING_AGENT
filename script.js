@@ -520,7 +520,7 @@ copyBtn.onclick = async () => {
 // Download Result
 // ===============================
 
-downloadBtn.onclick = () => {
+downldownloadBtn.onclick = () => {
 
     const text = result.innerText.trim();
 
@@ -532,9 +532,15 @@ downloadBtn.onclick = () => {
 
     }
 
+    const isHTML = text.includes("<!DOCTYPE html") || text.includes("<html");
+
+    const fileName = isHTML ? "website.html" : "AI_Output.txt";
+
+    const fileType = isHTML ? "text/html" : "text/plain";
+
     const blob = new Blob([text],{
 
-        type:"text/plain"
+        type: fileType
 
     });
 
@@ -542,13 +548,13 @@ downloadBtn.onclick = () => {
 
     link.href = URL.createObjectURL(blob);
 
-    link.download = "AI_Output.txt";
+    link.download = fileName;
 
     link.click();
 
     URL.revokeObjectURL(link.href);
 
-    showSuccess("Download Started.");
+    showSuccess("Done! File downloaded successfully.");
 
 };
 
