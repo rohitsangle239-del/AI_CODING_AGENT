@@ -520,7 +520,7 @@ copyBtn.onclick = async () => {
 // Download Result
 // ===============================
 
-downldownloadBtn.onclick = () => {
+downloadBtn.onclick = () => {
 
     const text = result.innerText.trim();
 
