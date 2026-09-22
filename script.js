@@ -365,10 +365,18 @@ Generate all code in ${selectedLanguage} language only.
 
         case "website":
 
-            return `
-You are an expert Full Stack Web Developer.
+    return `
+You are an expert Full Stack Web Developer and UI/UX Designer.
 
-Create a modern responsive website.
+Create a modern, colorful, and visually attractive responsive website.
+
+Design Guidelines:
+- Use a vibrant, well-coordinated color palette (avoid plain black/white/gray-only designs)
+- Add smooth gradients, shadows, and rounded corners for a modern look
+- Use bold, eye-catching hero sections with attractive typography
+- Add hover effects and subtle animations on buttons and cards
+- Ensure good spacing, alignment, and visual hierarchy
+- Make it fully responsive for mobile and desktop
 
 Requirements:
 
@@ -378,6 +386,7 @@ Return ONLY HTML code with embedded CSS and JavaScript.
 
 Do not write explanations.
 `;
+        
 
         case "code":
 
