@@ -1,6 +1,38 @@
+// Simple in-memory rate limiter
+const requestLog = {};
+
+const LIMIT = 5; // max requests
+const WINDOW = 60 * 1000; // per 60 seconds
+
+function isRateLimited(ip) {
+
+  const now = Date.now();
+
+  if (!requestLog[ip]) {
+    requestLog[ip] = [];
+  }
+
+  // Purane (window se bahar) timestamps hata do
+  requestLog[ip] = requestLog[ip].filter(time => now - time < WINDOW);
+
+  if (requestLog[ip].length >= LIMIT) {
+    return true;
+  }
+
+  requestLog[ip].push(now);
+  return false;
+
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: "Too many requests. Please wait a minute and try again." });
   }
 
   const { prompt, provider, model, messages } = req.body;
